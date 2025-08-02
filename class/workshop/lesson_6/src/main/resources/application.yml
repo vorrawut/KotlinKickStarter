@@ -1,0 +1,45 @@
+# Lesson 6 Workshop: Validation & Error Handling Configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: false
+
+spring:
+  application:
+    name: validation-service
+  
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      indent-output: true
+      write-dates-as-timestamps: false
+    
+logging:
+  level:
+    com.learning.validation: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.validator: DEBUG
+
+# Custom validation configuration
+validation:
+  user:
+    min-age: 18
+    max-age: 100
+    username-pattern: "^[a-zA-Z0-9_]{3,20}$"
+  
+  business:
+    max-retry-attempts: 3
+    operation-timeout-seconds: 30
+    
+# Management endpoints for monitoring validation errors
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,validation-errors
+  endpoint:
+    health:
+      show-details: always

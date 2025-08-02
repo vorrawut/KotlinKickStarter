@@ -1,0 +1,21 @@
+# Lesson 5 Workshop: REST API Configuration
+server:
+  port: 8080
+
+spring:
+  application:
+    name: booking-service
+    
+logging:
+  level:
+    com.learning.booking: DEBUG
+    org.springframework.web: DEBUG
+
+# Custom booking configuration
+booking:
+  rooms:
+    max-capacity: 100
+    default-price: 50.0
+  reservations:
+    max-duration-hours: 8
+    advance-booking-days: 30
