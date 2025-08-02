@@ -1,0 +1,1 @@
+rootProject.name = "lesson-2-workshop"
