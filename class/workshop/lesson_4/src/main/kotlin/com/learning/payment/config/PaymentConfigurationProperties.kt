@@ -11,11 +11,10 @@
 package com.learning.payment.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 
 // TODO: Add @ConfigurationProperties annotation
 // Bind to "payment" prefix in application.yml
-// TODO: Add @ConstructorBinding for immutable properties
+// Note: @ConstructorBinding is no longer needed in Spring Boot 3.x
 data class PaymentConfigurationProperties(
     val processors: ProcessorConfig,
     val audit: AuditConfig,

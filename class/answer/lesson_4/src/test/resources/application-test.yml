@@ -1,0 +1,32 @@
+# Test profile configuration
+spring:
+  application:
+    name: payment-service-test
+
+logging:
+  level:
+    com.learning.payment: DEBUG
+    org.springframework: WARN
+
+payment:
+  processors:
+    credit-card:
+      enabled: true
+      fee-rate: 0.025
+      max-amount: 5000.0
+    bank-transfer:
+      enabled: true
+      fee-rate: 0.0
+      max-amount: 25000.0
+    digital-wallet:
+      enabled: true
+      fee-rate: 0.025
+      max-amount: 1000.0
+  
+  audit:
+    enabled: true
+    compliance-mode: false
+  
+  retry:
+    max-attempts: 2
+    delay-ms: 500
