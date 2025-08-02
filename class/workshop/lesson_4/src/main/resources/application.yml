@@ -1,0 +1,69 @@
+# Lesson 4 Workshop: Spring Boot Configuration
+server:
+  port: 8080
+
+spring:
+  application:
+    name: payment-service
+  
+  profiles:
+    active: development
+    
+logging:
+  level:
+    com.learning.payment: DEBUG
+    org.springframework: INFO
+
+# TODO: Add custom payment configuration properties
+payment:
+  processors:
+    credit-card:
+      enabled: true
+      fee-rate: 0.029
+      max-amount: 10000.0
+    bank-transfer:
+      enabled: true
+      fee-rate: 0.0
+      max-amount: 50000.0
+    digital-wallet:
+      enabled: true
+      fee-rate: 0.03
+      max-amount: 2500.0
+  
+  audit:
+    enabled: true
+    compliance-mode: false
+  
+  retry:
+    max-attempts: 3
+    delay-ms: 1000
+
+---
+# Development profile
+spring:
+  config:
+    activate:
+      on-profile: development
+  
+payment:
+  audit:
+    compliance-mode: false
+    
+logging:
+  level:
+    com.learning.payment: DEBUG
+
+---
+# Production profile  
+spring:
+  config:
+    activate:
+      on-profile: production
+
+payment:
+  audit:
+    compliance-mode: true
+    
+logging:
+  level:
+    com.learning.payment: INFO
