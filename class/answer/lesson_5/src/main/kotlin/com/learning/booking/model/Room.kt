@@ -4,43 +4,30 @@
 
 package com.learning.booking.model
 
-import java.time.LocalDateTime
+import java.math.BigDecimal
 
 data class Room(
-    val id: String,
+    val id: Long,
     val name: String,
-    val roomType: RoomType,
+    val type: RoomType,
     val capacity: Int,
-    val pricePerHour: Double,
-    val amenities: List<String> = emptyList(),
-    val isActive: Boolean = true,
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val pricePerHour: BigDecimal,
+    val amenities: List<String>,
+    val isAvailable: Boolean = true
 ) {
-    
-    fun isAvailable(): Boolean {
-        return isActive
+    fun canAccommodate(guests: Int): Boolean {
+        return guests <= capacity
     }
     
-    fun canAccommodate(guestCount: Int): Boolean {
-        return guestCount <= capacity
-    }
-    
-    fun calculateCost(hours: Int): Double {
-        return hours * pricePerHour
+    fun calculateCost(hours: Int): BigDecimal {
+        return pricePerHour.multiply(BigDecimal(hours))
     }
 }
 
-enum class RoomType(val displayName: String, val baseCapacity: Int) {
-    CONFERENCE("Conference Room", 20),
-    MEETING("Meeting Room", 8),
-    WORKSHOP("Workshop Room", 30),
-    TRAINING("Training Room", 25),
-    PRESENTATION("Presentation Room", 50)
-}
-
-enum class RoomStatus {
-    AVAILABLE,
-    OCCUPIED,
-    MAINTENANCE,
-    RESERVED
+enum class RoomType(val displayName: String) {
+    CONFERENCE("Conference Room"),
+    MEETING("Meeting Room"),
+    TRAINING("Training Room"),
+    BOARDROOM("Board Room"),
+    PHONE_BOOTH("Phone Booth")
 }

@@ -1,0 +1,32 @@
+# Lesson 6 Complete Solution: Validation Application Configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: validation-service
+  
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      indent-output: true
+      write-dates-as-timestamps: false
+
+logging:
+  level:
+    com.learning.validation: DEBUG
+    org.springframework.web: INFO
+    org.springframework.validation: DEBUG
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

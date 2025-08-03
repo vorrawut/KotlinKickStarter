@@ -4,56 +4,45 @@
 
 package com.learning.booking.model
 
+import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 data class Reservation(
-    val id: String,
-    val roomId: String,
-    val customerName: String,
-    val customerEmail: String,
+    val id: Long,
+    val roomId: Long,
+    val guestName: String,
+    val guestEmail: String,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val guestCount: Int,
-    val totalCost: Double,
+    val numberOfGuests: Int,
+    val purpose: String,
     val status: ReservationStatus,
-    val notes: String? = null,
+    val totalCost: BigDecimal,
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
-    
-    val durationHours: Long
-        get() = ChronoUnit.HOURS.between(startTime, endTime)
-    
-    val isUpcoming: Boolean
-        get() = startTime.isAfter(LocalDateTime.now())
-    
-    val isActive: Boolean
-        get() = LocalDateTime.now().let { now ->
-            now.isAfter(startTime) && now.isBefore(endTime)
-        }
-    
-    fun isValidTimeSlot(): Boolean {
-        return startTime.isBefore(endTime) && startTime.isAfter(LocalDateTime.now())
+    fun getDurationHours(): Long {
+        return java.time.Duration.between(startTime, endTime).toHours()
     }
     
-    fun overlaps(other: Reservation): Boolean {
-        return roomId == other.roomId &&
-                startTime.isBefore(other.endTime) &&
-                endTime.isAfter(other.startTime)
+    fun isActive(): Boolean {
+        return status == ReservationStatus.CONFIRMED && 
+               startTime.isBefore(LocalDateTime.now()) && 
+               endTime.isAfter(LocalDateTime.now())
     }
     
-    fun canBeModified(): Boolean {
-        return status == ReservationStatus.PENDING && isUpcoming
+    fun isUpcoming(): Boolean {
+        return status == ReservationStatus.CONFIRMED && 
+               startTime.isAfter(LocalDateTime.now())
     }
     
     fun canBeCancelled(): Boolean {
-        return status in listOf(ReservationStatus.PENDING, ReservationStatus.CONFIRMED) && 
-               startTime.isAfter(LocalDateTime.now().plusHours(1))
+        return status == ReservationStatus.CONFIRMED && 
+               startTime.isAfter(LocalDateTime.now())
     }
 }
 
 enum class ReservationStatus(val displayName: String) {
-    PENDING("Pending Confirmation"),
+    PENDING("Pending"),
     CONFIRMED("Confirmed"),
     CANCELLED("Cancelled"),
     COMPLETED("Completed"),

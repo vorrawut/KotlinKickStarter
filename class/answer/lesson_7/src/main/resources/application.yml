@@ -1,0 +1,69 @@
+# Lesson 7 Workshop: Service Layer & Clean Architecture Configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: architecture-service
+  
+  # H2 Database for simple in-memory storage
+  datasource:
+    url: jdbc:h2:mem:architecture
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      indent-output: true
+      write-dates-as-timestamps: false
+
+logging:
+  level:
+    com.learning.architecture: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Custom configuration for clean architecture patterns
+architecture:
+  service:
+    cache-enabled: true
+    batch-size: 100
+    timeout-seconds: 30
+  
+  repository:
+    enable-auditing: true
+    default-page-size: 20
+    max-page-size: 100
+  
+  validation:
+    strict-mode: true
+    enable-cross-field-validation: true
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

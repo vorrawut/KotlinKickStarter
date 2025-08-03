@@ -45,7 +45,7 @@ KotlinKickStarter/
 | Lesson | Topic | What You'll Build | Duration |
 |--------|-------|-------------------|----------|
 | **6** | [Request Validation & Error Handling](class/modules/lesson_6/) ✅ | Robust API with validation | 30 min |
-| **7** | [Service Layer & Clean Architecture](class/modules/lesson_7/) | Layered service design | 25 min |
+| **7** | [Service Layer & Clean Architecture](class/modules/lesson_7/) ✅ | Layered service design | 25 min |
 | **8** | [Persistence with Spring Data JPA](class/modules/lesson_8/) | Database integration | 30 min |
 | **9** | [CRUD Operations & Transactions](class/modules/lesson_9/) | Complete CRUD API | 30 min |
 | **10** | [Pagination & Filtering](class/modules/lesson_10/) | Advanced query patterns | 25 min |
