@@ -1,0 +1,83 @@
+# Lesson 11 Complete Solution: Testing Fundamentals Configuration
+
+spring:
+  profiles:
+    active: dev
+    
+  # H2 Database Configuration for Development and Testing
+  datasource:
+    url: jdbc:h2:mem:testingdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+    
+  # JPA/Hibernate Configuration for Testing
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        use_sql_comments: true
+        
+  # H2 Console Configuration
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      
+  # Security Configuration for Testing
+  security:
+    user:
+      name: testuser
+      password: testpass
+      roles: USER,ADMIN
+      
+# Logging Configuration for Test Output
+logging:
+  level:
+    com.learning.testing: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.test: DEBUG
+    org.springframework.transaction: DEBUG
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,beans,caches
+  endpoint:
+    health:
+      show-details: always
+
+---
+# Test Profile Configuration
+spring:
+  config:
+    activate:
+      on-profile: test
+      
+  # Test Database Configuration
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false  # Disable for faster test execution
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        
+  # Test Security Configuration
+  security:
+    user:
+      name: testuser
+      password: testpass

@@ -115,11 +115,11 @@
 | Phase | Lesson | Topic | Workshop | Concept | Answer | Tests | Status |
 |-------|--------|-------|----------|---------|--------|-------|--------|
 | 1 | 1 | Kotlin 101 | ✅ | ✅ | ✅ | ✅ | **COMPLETE** |
-| 1 | 2 | Collections | ❌ | 🟡 | ❌ | ❌ | In Progress |
-| 1 | 3 | OOP Features | ❌ | ❌ | ❌ | ❌ | Not Started |
-| 1 | 4 | Spring Boot Setup | ❌ | ❌ | ❌ | ❌ | Not Started |
-| 1 | 5 | REST Controllers | ❌ | ❌ | ❌ | ❌ | Not Started |
-| 2 | 6-11 | API Development | ❌ | ❌ | ❌ | ❌ | Not Started |
+| 1 | 2 | Collections | ✅ | ✅ | ✅ | ✅ | **COMPLETE** |
+| 1 | 3 | OOP Features | ✅ | ✅ | ✅ | ✅ | **COMPLETE** |
+| 1 | 4 | Spring Boot Setup | ✅ | ✅ | ✅ | ✅ | **COMPLETE** |
+| 1 | 5 | REST Controllers | ✅ | ✅ | ✅ | ✅ | **COMPLETE** |
+| 2 | 6-11 | API Development | ✅ | ✅ | ✅ | ✅ | **COMPLETE** |
 | 3 | 12-16 | Advanced Patterns | ❌ | ❌ | ❌ | ❌ | Not Started |
 | 4 | 17-20 | Deployment | ❌ | ❌ | ❌ | ❌ | Not Started |
 

@@ -1,0 +1,67 @@
+# Lesson 11 Workshop: Testing Fundamentals Configuration
+
+spring:
+  profiles:
+    active: dev
+    
+  # TODO: Configure H2 database for development and testing
+  datasource:
+    # TODO: Add H2 database URL (jdbc:h2:mem:testingdb)
+    # TODO: Add username and password
+    # TODO: Add H2 driver class name
+    
+  # TODO: Configure JPA/Hibernate for testing
+  jpa:
+    # TODO: Set hibernate.ddl-auto to create-drop for development
+    # TODO: Enable show-sql for development
+    # TODO: Configure hibernate properties for testing
+    hibernate:
+      # TODO: Add ddl-auto setting
+    # TODO: Add show-sql setting
+    properties:
+      hibernate:
+        # TODO: Add H2 dialect
+        # TODO: Enable SQL formatting
+        
+  # TODO: Configure H2 console for development
+  h2:
+    console:
+      # TODO: Enable H2 console
+      
+  # TODO: Configure security for testing
+  security:
+    # TODO: Add basic security configuration for testing
+      
+# TODO: Configure logging levels for test output
+logging:
+  level:
+    # TODO: Set com.learning.testing to DEBUG
+    # TODO: Set org.hibernate.SQL to DEBUG for SQL logging
+    # TODO: Set org.springframework.test to DEBUG for test logging
+
+# TODO: Configure management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        # TODO: Include health, info, metrics endpoints
+
+---
+# TODO: Test profile configuration
+spring:
+  config:
+    activate:
+      on-profile: test
+      
+  # TODO: Configure test database
+  datasource:
+    # TODO: Configure test-specific database settings
+    
+  jpa:
+    hibernate:
+      # TODO: Use create-drop for tests
+    # TODO: Disable SQL logging for faster tests
+    
+  # TODO: Configure test-specific security
+  security:
+    # TODO: Add test security configuration

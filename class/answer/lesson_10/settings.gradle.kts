@@ -1,0 +1,1 @@
+rootProject.name = "lesson-10-pagination-filtering"

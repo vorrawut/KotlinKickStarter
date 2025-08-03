@@ -1,0 +1,1 @@
+rootProject.name = "lesson-11-testing-fundamentals"

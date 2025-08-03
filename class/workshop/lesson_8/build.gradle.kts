@@ -41,7 +41,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:mongodb")
-    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.9.2")
+    // testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.9.2")
     
     // Additional testing utilities
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

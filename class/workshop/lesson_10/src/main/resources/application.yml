@@ -1,0 +1,93 @@
+# Lesson 10 Workshop: Pagination & Filtering Configuration
+
+spring:
+  profiles:
+    active: dev
+    
+  # TODO: Configure H2 database with larger memory for pagination testing
+  datasource:
+    # TODO: Add H2 database URL with larger memory settings
+    # TODO: Add username and password
+    # TODO: Add H2 driver class name
+    
+  # TODO: Configure JPA/Hibernate for pagination optimization
+  jpa:
+    # TODO: Set hibernate.ddl-auto to create-drop for development
+    # TODO: Enable show-sql for development
+    # TODO: Configure batch loading for performance
+    hibernate:
+      # TODO: Add ddl-auto setting
+      # TODO: Configure batch size for bulk operations
+    # TODO: Add show-sql setting
+    properties:
+      hibernate:
+        # TODO: Add H2 dialect
+        # TODO: Enable SQL formatting
+        # TODO: Configure batch settings for pagination
+        
+  # TODO: Configure H2 console for development
+  h2:
+    console:
+      # TODO: Enable H2 console
+      
+  # TODO: Configure cache settings for search results
+  cache:
+    # TODO: Configure cache type (simple for development)
+    # TODO: Set cache names for search results
+      
+# TODO: Configure logging levels for SQL analysis
+logging:
+  level:
+    # TODO: Set com.learning.pagination to DEBUG
+    # TODO: Set org.hibernate.SQL to DEBUG (for SQL logging)
+    # TODO: Set org.hibernate.type.descriptor.sql.BasicBinder to TRACE (for parameters)
+    # TODO: Set org.springframework.data.jpa to DEBUG (for repository logging)
+
+# TODO: Configure management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        # TODO: Include health, info, metrics, caches endpoints
+
+---
+# TODO: Production profile configuration
+spring:
+  config:
+    activate:
+      on-profile: prod
+      
+  # TODO: Configure PostgreSQL for production
+  datasource:
+    # TODO: Add PostgreSQL URL with environment variables
+    # TODO: Add username and password from environment
+    # TODO: Add PostgreSQL driver
+    
+  jpa:
+    hibernate:
+      # TODO: Change ddl-auto to validate for production
+    # TODO: Disable show-sql in production
+    properties:
+      hibernate:
+        # TODO: Add PostgreSQL dialect
+        # TODO: Configure production batch settings
+        
+  # TODO: Configure production cache settings
+  cache:
+    # TODO: Configure Redis or other cache provider for production
+        
+---
+# TODO: Test profile configuration
+spring:
+  config:
+    activate:
+      on-profile: test
+      
+  # TODO: Configure test database settings
+  datasource:
+    # TODO: Configure test database (H2 in-memory)
+    
+  jpa:
+    hibernate:
+      # TODO: Use create-drop for tests
+    # TODO: Disable SQL logging for faster tests

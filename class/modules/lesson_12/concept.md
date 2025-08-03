@@ -1,283 +1,222 @@
-# 🎯 Lesson 12: Authentication & JWT Security
+# 📚 Lesson 12: Authentication & JWT Security - Enterprise-Grade Security Implementation
 
-## Objective
+## 🎯 Learning Objectives
 
-Implement robust authentication and authorization using JWT tokens and Spring Security. Learn to secure API endpoints, manage user sessions, and implement role-based access control for production applications.
+By the end of this lesson, you will be able to:
+- Master authentication vs authorization concepts and implement both securely
+- Design and implement JWT-based authentication systems with token refresh
+- Configure Spring Security for enterprise-grade security requirements
+- Implement role-based access control (RBAC) with fine-grained permissions
+- Secure passwords using modern hashing algorithms and salt strategies
+- Create comprehensive security testing with @WithMockUser and security contexts
+- Implement OAuth2-style authentication flows with proper token management
+- Design secure APIs that follow security best practices and industry standards
 
-## Key Concepts
+## 🔐 Security Fundamentals
 
-### 1. Spring Security Configuration
+### Authentication vs Authorization
 
+**Authentication** (AuthN): *"Who are you?"*
+- Verifying the identity of a user or system
+- Confirming credentials (username/password, tokens, certificates)
+- Establishing a security context for subsequent requests
+- Typically happens once per session or token lifetime
+
+**Authorization** (AuthZ): *"What can you do?"*
+- Determining what an authenticated user is allowed to do
+- Checking permissions, roles, and access rights
+- Enforced on every protected resource access
+- Can be role-based, attribute-based, or resource-based
+
+### Security Principles
+
+**Defense in Depth:**
+- Multiple layers of security controls
+- No single point of failure
+- Each layer provides independent protection
+- Combination of preventive, detective, and corrective controls
+
+**Principle of Least Privilege:**
+- Users get minimal access needed for their role
+- Permissions are granted explicitly, not by default
+- Regular access reviews and permission audits
+- Time-limited access for sensitive operations
+
+## 🎟️ JSON Web Tokens (JWT) Deep Dive
+
+### JWT Structure and Components
+
+```
+JWT = Base64UrlEncode(Header) + "." + Base64UrlEncode(Payload) + "." + Base64UrlEncode(Signature)
+```
+
+**Header:**
+```json
+{
+  "alg": "HS256",      // Algorithm used for signing
+  "typ": "JWT"         // Token type
+}
+```
+
+**Payload (Claims):**
+```json
+{
+  "sub": "1234567890",           // Subject (user ID)
+  "name": "John Doe",            // Custom claim
+  "iat": 1516239022,             // Issued at
+  "exp": 1516242622,             // Expiration time
+  "aud": "my-app",               // Audience
+  "iss": "my-auth-server",       // Issuer
+  "roles": ["USER", "ADMIN"]     // Custom roles claim
+}
+```
+
+### JWT Advantages
+
+✅ **Stateless Authentication:**
+- No server-side session storage required
+- Horizontal scaling without session affinity
+- Reduced database load for authentication checks
+- Self-contained tokens with all necessary information
+
+✅ **Cross-Domain Support:**
+- CORS-friendly authentication mechanism
+- Suitable for microservices architecture
+- Mobile and SPA application support
+- Third-party service integration
+
+## 🛡️ Spring Security Architecture
+
+### Spring Security Filter Chain
+
+Spring Security operates through a chain of filters that intercept HTTP requests:
+
+```
+HTTP Request
+    ↓
+SecurityContextPersistenceFilter    // Establishes SecurityContext
+    ↓
+LogoutFilter                       // Handles logout requests
+    ↓
+UsernamePasswordAuthenticationFilter // Processes login attempts
+    ↓
+JwtAuthenticationFilter           // Custom JWT validation (our addition)
+    ↓
+ExceptionTranslationFilter        // Handles security exceptions
+    ↓
+FilterSecurityInterceptor         // Authorization decisions
+    ↓
+Application Controller
+```
+
+### Core Spring Security Components
+
+**SecurityContext & SecurityContextHolder:**
 ```kotlin
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
-class SecurityConfig {
+// Get current authenticated user
+val authentication = SecurityContextHolder.getContext().authentication
+val username = authentication.name
+val authorities = authentication.authorities
+
+// Set authentication programmatically
+val authToken = UsernamePasswordAuthenticationToken(
+    user, null, user.authorities
+)
+SecurityContextHolder.getContext().authentication = authToken
+```
+
+**UserDetailsService:**
+```kotlin
+@Service
+class CustomUserDetailsService(
+    private val userRepository: UserRepository
+) : UserDetailsService {
     
-    @Bean
-    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
-    
-    @Bean
-    fun jwtAuthenticationEntryPoint(): AuthenticationEntryPoint {
-        return AuthenticationEntryPoint { request, response, authException ->
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
-        }
-    }
-    
-    @Bean
-    fun filterChain(
-        http: HttpSecurity,
-        jwtAuthenticationEntryPoint: AuthenticationEntryPoint,
-        jwtRequestFilter: JwtRequestFilter
-    ): SecurityFilterChain {
-        return http
-            .csrf { it.disable() }
-            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-            .authorizeHttpRequests { auth ->
-                auth
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/public/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/payments/**").hasAnyRole("USER", "ADMIN")
-                    .requestMatchers(HttpMethod.POST, "/api/payments/**").hasAnyRole("USER", "ADMIN")
-                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                    .anyRequest().authenticated()
-            }
-            .exceptionHandling { it.authenticationEntryPoint(jwtAuthenticationEntryPoint) }
-            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)
+    override fun loadUserByUsername(username: String): UserDetails {
+        val user = userRepository.findByUsername(username)
+            ?: throw UsernameNotFoundException("User not found: $username")
+        
+        return User.builder()
+            .username(user.username)
+            .password(user.password)
+            .authorities(user.roles.map { SimpleGrantedAuthority("ROLE_${it.name}") })
+            .accountExpired(!user.isActive)
+            .accountLocked(user.isLocked)
+            .credentialsExpired(user.isCredentialsExpired)
+            .disabled(!user.isEnabled)
             .build()
     }
 }
 ```
 
-### 2. JWT Token Management
+## 🔧 JWT Implementation with Spring Security
+
+### JWT Utility Service
 
 ```kotlin
-@Component
-class JwtTokenUtil {
+@Service
+class JwtService {
     
     @Value("\${jwt.secret}")
     private lateinit var secret: String
     
     @Value("\${jwt.expiration}")
-    private var expiration: Int = 86400 // 24 hours
+    private var expiration: Long = 86400000 // 24 hours
     
     fun generateToken(userDetails: UserDetails): String {
-        val claims = mapOf<String, Any>(
-            "sub" to userDetails.username,
-            "roles" to userDetails.authorities.map { it.authority },
-            "iat" to Date().time / 1000,
-            "exp" to (Date().time / 1000) + expiration
-        )
+        val claims = HashMap<String, Any>()
         
+        // Add custom claims
+        if (userDetails is CustomUserDetails) {
+            claims["userId"] = userDetails.getId()
+            claims["email"] = userDetails.getEmail()
+            claims["roles"] = userDetails.authorities.map { it.authority }
+        }
+        
+        return createToken(claims, userDetails.username)
+    }
+    
+    private fun createToken(claims: Map<String, Any>, subject: String): String {
         return Jwts.builder()
             .setClaims(claims)
-            .setSubject(userDetails.username)
+            .setSubject(subject)
             .setIssuedAt(Date())
-            .setExpiration(Date(Date().time + expiration * 1000))
-            .signWith(SignatureAlgorithm.HS256, secret)
+            .setExpiration(Date(System.currentTimeMillis() + expiration))
+            .signWith(SignatureAlgorithm.HS512, secret)
             .compact()
     }
     
     fun validateToken(token: String, userDetails: UserDetails): Boolean {
-        val username = getUsernameFromToken(token)
+        val username = extractUsername(token)
         return username == userDetails.username && !isTokenExpired(token)
     }
     
-    fun getUsernameFromToken(token: String): String {
-        return getClaimFromToken(token) { it.subject }
-    }
-    
-    fun getExpirationDateFromToken(token: String): Date {
-        return getClaimFromToken(token) { it.expiration }
-    }
-    
-    private fun <T> getClaimFromToken(token: String, claimsResolver: (Claims) -> T): T {
-        val claims = getAllClaimsFromToken(token)
-        return claimsResolver(claims)
-    }
-    
-    private fun getAllClaimsFromToken(token: String): Claims {
-        return Jwts.parser()
-            .setSigningKey(secret)
-            .parseClaimsJws(token)
-            .body
-    }
-    
-    private fun isTokenExpired(token: String): Boolean {
-        val expiration = getExpirationDateFromToken(token)
-        return expiration.before(Date())
+    fun extractUsername(token: String): String {
+        return extractClaim(token, Claims::getSubject)
     }
 }
 ```
 
-### 3. JWT Filter Implementation
+## 👥 Role-Based Access Control (RBAC)
 
-```kotlin
-@Component
-class JwtRequestFilter(
-    private val userDetailsService: UserDetailsService,
-    private val jwtTokenUtil: JwtTokenUtil
-) : OncePerRequestFilter() {
-    
-    override fun doFilterInternal(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-        filterChain: FilterChain
-    ) {
-        val requestTokenHeader = request.getHeader("Authorization")
-        
-        var username: String? = null
-        var jwtToken: String? = null
-        
-        if (requestTokenHeader?.startsWith("Bearer ") == true) {
-            jwtToken = requestTokenHeader.substring(7)
-            try {
-                username = jwtTokenUtil.getUsernameFromToken(jwtToken)
-            } catch (e: IllegalArgumentException) {
-                logger.error("Unable to get JWT Token")
-            } catch (e: ExpiredJwtException) {
-                logger.error("JWT Token has expired")
-            }
-        }
-        
-        if (username != null && SecurityContextHolder.getContext().authentication == null) {
-            val userDetails = userDetailsService.loadUserByUsername(username)
-            
-            if (jwtTokenUtil.validateToken(jwtToken!!, userDetails)) {
-                val usernamePasswordAuthenticationToken = UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.authorities
-                )
-                usernamePasswordAuthenticationToken.details = WebAuthenticationDetailsSource().buildDetails(request)
-                SecurityContextHolder.getContext().authentication = usernamePasswordAuthenticationToken
-            }
-        }
-        
-        filterChain.doFilter(request, response)
-    }
-}
-```
-
-### 4. Authentication Controller
-
-```kotlin
-@RestController
-@RequestMapping("/api/auth")
-class AuthController(
-    private val authenticationManager: AuthenticationManager,
-    private val userService: UserService,
-    private val jwtTokenUtil: JwtTokenUtil
-) {
-    
-    @PostMapping("/login")
-    fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
-        try {
-            authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken(request.email, request.password)
-            )
-        } catch (e: BadCredentialsException) {
-            throw BadCredentialsException("Invalid credentials", e)
-        }
-        
-        val userDetails = userService.loadUserByUsername(request.email)
-        val token = jwtTokenUtil.generateToken(userDetails)
-        
-        return ResponseEntity.ok(
-            AuthResponse(
-                token = token,
-                type = "Bearer",
-                email = userDetails.username,
-                roles = userDetails.authorities.map { it.authority }
-            )
-        )
-    }
-    
-    @PostMapping("/register")
-    fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
-        if (userService.existsByEmail(request.email)) {
-            throw UserAlreadyExistsException("Email already registered: ${request.email}")
-        }
-        
-        val user = userService.createUser(request)
-        val userDetails = userService.loadUserByUsername(user.email)
-        val token = jwtTokenUtil.generateToken(userDetails)
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            AuthResponse(
-                token = token,
-                type = "Bearer",
-                email = userDetails.username,
-                roles = userDetails.authorities.map { it.authority }
-            )
-        )
-    }
-    
-    @PostMapping("/refresh")
-    @PreAuthorize("hasRole('USER')")
-    fun refreshToken(authentication: Authentication): ResponseEntity<AuthResponse> {
-        val userDetails = authentication.principal as UserDetails
-        val token = jwtTokenUtil.generateToken(userDetails)
-        
-        return ResponseEntity.ok(
-            AuthResponse(
-                token = token,
-                type = "Bearer",
-                email = userDetails.username,
-                roles = userDetails.authorities.map { it.authority }
-            )
-        )
-    }
-}
-
-data class LoginRequest(
-    @field:Email(message = "Invalid email format")
-    val email: String,
-    
-    @field:NotBlank(message = "Password is required")
-    val password: String
-)
-
-data class RegisterRequest(
-    @field:NotBlank(message = "Name is required")
-    val name: String,
-    
-    @field:Email(message = "Invalid email format")
-    val email: String,
-    
-    @field:Size(min = 8, message = "Password must be at least 8 characters")
-    val password: String
-)
-
-data class AuthResponse(
-    val token: String,
-    val type: String,
-    val email: String,
-    val roles: List<String>
-)
-```
-
-### 5. Role-Based Access Control
+### User and Role Models
 
 ```kotlin
 @Entity
 @Table(name = "users")
 data class User(
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    val id: String? = null,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
+    
+    @Column(unique = true, nullable = false)
+    val username: String,
     
     @Column(unique = true, nullable = false)
     val email: String,
     
     @Column(nullable = false)
-    val name: String,
-    
-    @Column(nullable = false)
     val password: String,
-    
-    @Column(nullable = false)
-    val isEnabled: Boolean = true,
     
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -285,85 +224,164 @@ data class User(
         joinColumns = [JoinColumn(name = "user_id")],
         inverseJoinColumns = [JoinColumn(name = "role_id")]
     )
-    val roles: Set<Role> = emptySet()
-)
+    val roles: Set<Role> = setOf()
+) {
+    
+    fun getAuthorities(): List<GrantedAuthority> {
+        return roles.map { role ->
+            SimpleGrantedAuthority("ROLE_${role.name}")
+        }
+    }
+    
+    fun hasRole(roleName: String): Boolean {
+        return roles.any { it.name == roleName }
+    }
+}
 
 @Entity
 @Table(name = "roles")
 data class Role(
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    val id: String? = null,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
     
-    @Enumerated(EnumType.STRING)
     @Column(unique = true, nullable = false)
-    val name: RoleName
-)
-
-enum class RoleName {
-    ROLE_USER, ROLE_ADMIN, ROLE_MODERATOR
-}
-
-@Component
-class UserDetailsServiceImpl(
-    private val userRepository: UserRepository
-) : UserDetailsService {
-    
-    override fun loadUserByUsername(email: String): UserDetails {
-        val user = userRepository.findByEmail(email)
-            ?: throw UsernameNotFoundException("User not found: $email")
-        
-        return UserPrincipal.create(user)
-    }
-}
-
-data class UserPrincipal(
-    val id: String,
     val name: String,
-    private val email: String,
-    private val password: String,
-    private val authorities: Collection<GrantedAuthority>
-) : UserDetails {
     
-    override fun getAuthorities(): Collection<GrantedAuthority> = authorities
-    override fun getPassword(): String = password
-    override fun getUsername(): String = email
-    override fun isAccountNonExpired(): Boolean = true
-    override fun isAccountNonLocked(): Boolean = true
-    override fun isCredentialsNonExpired(): Boolean = true
-    override fun isEnabled(): Boolean = true
+    val description: String
+)
+```
+
+### Method-Level Security
+
+```kotlin
+@Service
+class UserService(
+    private val userRepository: UserRepository
+) {
     
-    companion object {
-        fun create(user: User): UserPrincipal {
-            val authorities = user.roles.map { 
-                SimpleGrantedAuthority(it.name.name) 
-            }
-            
-            return UserPrincipal(
-                id = user.id!!,
-                name = user.name,
-                email = user.email,
-                password = user.password,
-                authorities = authorities
-            )
-        }
+    @PreAuthorize("hasRole('ADMIN')")
+    fun getAllUsers(): List<User> {
+        return userRepository.findAll()
+    }
+    
+    @PreAuthorize("hasRole('ADMIN') or authentication.name == #username")
+    fun getUserByUsername(username: String): User? {
+        return userRepository.findByUsername(username)
+    }
+    
+    @PostAuthorize("hasRole('ADMIN') or returnObject.username == authentication.name")
+    fun findUserById(id: Long): User? {
+        return userRepository.findById(id).orElse(null)
     }
 }
 ```
 
-## Security Best Practices
+## 🔐 Password Security
 
-### ✅ Do:
-- **Use strong, unique JWT secrets** - store in environment variables
-- **Implement proper token expiration** - short-lived access tokens
-- **Hash passwords securely** - use BCrypt with high work factor
-- **Validate all inputs** - prevent injection attacks
-- **Use HTTPS in production** - encrypt all communications
+### Modern Password Hashing
 
-### ❌ Avoid:
-- **Storing sensitive data in JWT** - tokens can be decoded
-- **Using weak secrets** - use cryptographically strong keys
-- **Ignoring token expiration** - implement refresh token strategy
-- **Exposing internal user details** - sanitize responses
+```kotlin
+@Service
+class PasswordService(
+    private val passwordEncoder: PasswordEncoder
+) {
+    
+    fun hashPassword(rawPassword: String): String {
+        // BCrypt automatically handles salt generation
+        return passwordEncoder.encode(rawPassword)
+    }
+    
+    fun verifyPassword(rawPassword: String, hashedPassword: String): Boolean {
+        return passwordEncoder.matches(rawPassword, hashedPassword)
+    }
+    
+    fun isPasswordStrong(password: String): Boolean {
+        return password.length >= 8 &&
+                password.any { it.isDigit() } &&
+                password.any { it.isUpperCase() } &&
+                password.any { it.isLowerCase() } &&
+                password.any { !it.isLetterOrDigit() }
+    }
+}
+```
 
-This lesson teaches you to build secure, production-ready authentication systems that protect user data and API endpoints.
+## 🧪 Security Testing Strategies
+
+### Authentication Controller Testing
+
+```kotlin
+@WebMvcTest(AuthController::class)
+class AuthControllerTest {
+    
+    @Autowired
+    private lateinit var mockMvc: MockMvc
+    
+    @MockBean
+    private lateinit var authService: AuthService
+    
+    @Test
+    fun `should authenticate user with valid credentials`() {
+        // Given
+        val loginRequest = LoginRequest("testuser", "password123")
+        val authResponse = AuthResponse(
+            token = "jwt-token",
+            user = UserResponse(1L, "testuser", "test@example.com")
+        )
+        
+        every { authService.authenticate(any()) } returns authResponse
+        
+        // When & Then
+        mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.token").exists())
+            .andExpect(jsonPath("$.user.username").value("testuser"))
+    }
+}
+```
+
+### Security Configuration Testing
+
+```kotlin
+@SpringBootTest
+class SecurityConfigIntegrationTest {
+    
+    @Autowired
+    private lateinit var mockMvc: MockMvc
+    
+    @Test
+    fun `should allow access to public endpoints without authentication`() {
+        mockMvc.perform(get("/api/public/health"))
+            .andExpect(status().isOk)
+    }
+    
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `should allow USER role access to user endpoints`() {
+        mockMvc.perform(get("/api/users"))
+            .andExpect(status().isOk)
+    }
+    
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `should allow ADMIN role access to all endpoints`() {
+        mockMvc.perform(get("/api/admin/users"))
+            .andExpect(status().isOk)
+    }
+}
+```
+
+## 🎯 Key Security Best Practices
+
+1. **JWT Security**: Implement proper token validation, short expiration, and secure storage
+2. **Spring Security**: Configure filter chain, authentication providers, and method security
+3. **Password Security**: Use strong hashing (BCrypt), enforce policies, prevent common attacks
+4. **Role-Based Access**: Design flexible RBAC with roles and permissions
+5. **Security Testing**: Test authentication, authorization, and security configurations
+6. **Production Security**: Implement rate limiting, audit logging, and security headers
+
+This comprehensive security implementation provides enterprise-grade authentication and authorization suitable for production Spring Boot applications.
