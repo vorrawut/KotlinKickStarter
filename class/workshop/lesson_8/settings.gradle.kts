@@ -1,0 +1,1 @@
+rootProject.name = "lesson-8-persistence"

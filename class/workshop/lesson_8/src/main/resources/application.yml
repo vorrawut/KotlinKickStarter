@@ -1,0 +1,95 @@
+# Lesson 8 Workshop: Dual Database Configuration
+
+spring:
+  profiles:
+    active: dev
+    
+  # TODO: Configure H2 database for development
+  datasource:
+    # TODO: Add H2 database URL (jdbc:h2:mem:lesson8db)
+    # TODO: Add username and password
+    # TODO: Add H2 driver class name
+    
+  # TODO: Configure JPA/Hibernate settings
+  jpa:
+    # TODO: Set hibernate.ddl-auto to create-drop for development
+    # TODO: Enable show-sql for development
+    # TODO: Configure hibernate properties
+    hibernate:
+      # TODO: Add ddl-auto setting
+    # TODO: Add show-sql setting
+    properties:
+      hibernate:
+        # TODO: Add H2 dialect
+        # TODO: Enable SQL formatting
+        
+  # TODO: Configure H2 console for development
+  h2:
+    console:
+      # TODO: Enable H2 console
+      
+  # TODO: Configure MongoDB
+  data:
+    mongodb:
+      # TODO: Set database name (lesson8_mongo)
+      # TODO: Enable auto-index-creation
+      
+# TODO: Configure logging levels
+logging:
+  level:
+    # TODO: Set com.learning.persistence to DEBUG
+    # TODO: Set org.springframework.data to INFO
+    # TODO: Set org.hibernate.SQL to DEBUG (for SQL logging)
+
+# TODO: Configure management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        # TODO: Include health, info, metrics endpoints
+
+---
+# TODO: Production profile configuration
+spring:
+  config:
+    activate:
+      on-profile: prod
+      
+  # TODO: Configure PostgreSQL for production
+  datasource:
+    # TODO: Add PostgreSQL URL with environment variables
+    # TODO: Add username and password from environment
+    # TODO: Add PostgreSQL driver
+    
+  jpa:
+    hibernate:
+      # TODO: Change ddl-auto to validate for production
+    # TODO: Disable show-sql in production
+    properties:
+      hibernate:
+        # TODO: Add PostgreSQL dialect
+        
+  # TODO: Configure MongoDB for production
+  data:
+    mongodb:
+      # TODO: Add production MongoDB URI with environment variables
+
+---
+# TODO: Test profile configuration
+spring:
+  config:
+    activate:
+      on-profile: test
+      
+  # TODO: Configure embedded MongoDB for testing
+  mongodb:
+    embedded:
+      # TODO: Set version for embedded MongoDB
+      
+  # TODO: Configure test database settings
+  datasource:
+    # TODO: Configure test database (H2 in-memory)
+    
+  jpa:
+    hibernate:
+      # TODO: Use create-drop for tests
