@@ -15,7 +15,8 @@ import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetailsService
+import com.learning.security.service.CustomUserDetailsService
+import org.springframework.security.core.userdetails.UserDetails as SpringUserDetails
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -24,7 +25,7 @@ import java.io.IOException
 @Component
 class JwtAuthenticationFilter(
     private val jwtService: JwtService,
-    private val userDetailsService: UserDetailsService
+    private val userDetailsService: CustomUserDetailsService
 ) : OncePerRequestFilter() {
     
     private val logger = LoggerFactory.getLogger(JwtAuthenticationFilter::class.java)

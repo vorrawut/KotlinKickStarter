@@ -9,7 +9,7 @@ package com.learning.security.service
 
 import com.learning.security.repository.UserRepository
 import org.slf4j.LoggerFactory
-import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetails as SpringUserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
@@ -24,7 +24,7 @@ class CustomUserDetailsService(
     private val logger = LoggerFactory.getLogger(CustomUserDetailsService::class.java)
     
     @Throws(UsernameNotFoundException::class)
-    override fun loadUserByUsername(username: String): UserDetails {
+    override fun loadUserByUsername(username: String): SpringUserDetails {
         logger.debug("Loading user by username: $username")
         
         if (username.isBlank()) {
@@ -59,7 +59,7 @@ class CustomUserDetailsService(
     /**
      * Load user by email specifically
      */
-    fun loadUserByEmail(email: String): UserDetails {
+    fun loadUserByEmail(email: String): SpringUserDetails {
         logger.debug("Loading user by email: $email")
         
         if (email.isBlank()) {
@@ -79,7 +79,7 @@ class CustomUserDetailsService(
     /**
      * Load user by ID (useful for token-based operations)
      */
-    fun loadUserById(userId: Long): UserDetails {
+    fun loadUserById(userId: Long): SpringUserDetails {
         logger.debug("Loading user by ID: $userId")
         
         val user = userRepository.findById(userId)

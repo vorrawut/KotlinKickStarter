@@ -9,10 +9,13 @@ package com.learning.security.service
 
 import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.io.Decoders
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetails as SpringUserDetails
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
+import com.learning.security.model.User
 import java.security.Key
 import java.util.*
 import javax.crypto.spec.SecretKeySpec
@@ -28,8 +31,8 @@ class JwtService {
     @Value("\${jwt.expiration}")
     private var expiration: Long = 86400000 // 24 hours default
     
-    private val jwtParser: JwtParser by lazy {
-        Jwts.parserBuilder()
+    private fun getJwtParser(): JwtParser {
+        return Jwts.parserBuilder()
             .setSigningKey(getSigningKey())
             .build()
     }
@@ -45,7 +48,7 @@ class JwtService {
     /**
      * Generate JWT token for authenticated user
      */
-    fun generateToken(userDetails: UserDetails): String {
+    fun generateToken(userDetails: SpringUserDetails): String {
         val claims = buildClaims(userDetails)
         return createToken(claims, userDetails.username)
     }
@@ -53,7 +56,7 @@ class JwtService {
     /**
      * Generate JWT token with custom expiration
      */
-    fun generateToken(userDetails: UserDetails, customExpirationMs: Long): String {
+    fun generateToken(userDetails: SpringUserDetails, customExpirationMs: Long): String {
         val claims = buildClaims(userDetails)
         return createToken(claims, userDetails.username, customExpirationMs)
     }
@@ -61,7 +64,7 @@ class JwtService {
     /**
      * Validate JWT token against user details
      */
-    fun validateToken(token: String, userDetails: UserDetails): Boolean {
+    fun validateToken(token: String, userDetails: SpringUserDetails): Boolean {
         return try {
             val username = extractUsername(token)
             val isUsernameValid = username == userDetails.username
@@ -209,7 +212,7 @@ class JwtService {
      */
     fun validateTokenStructure(token: String): Boolean {
         return try {
-            jwtParser.parseClaimsJws(token)
+            getJwtParser().parseClaimsJws(token)
             true
         } catch (e: ExpiredJwtException) {
             // Token is expired but structure is valid
@@ -225,7 +228,7 @@ class JwtService {
      */
     fun extractTokenType(token: String): String? {
         return try {
-            val header = jwtParser.parseClaimsJws(token).header
+            val header = getJwtParser().parseClaimsJws(token).header
             header["typ"] as? String
         } catch (e: Exception) {
             logger.warn("Failed to extract token type", e)
@@ -254,7 +257,7 @@ class JwtService {
             .compact()
     }
     
-    private fun buildClaims(userDetails: UserDetails): Map<String, Any> {
+    private fun buildClaims(userDetails: SpringUserDetails): Map<String, Any> {
         val claims = HashMap<String, Any>()
         
         // Add standard claims
@@ -274,7 +277,7 @@ class JwtService {
     
     private fun extractAllClaims(token: String): Claims {
         return try {
-            jwtParser.parseClaimsJws(token).body
+            getJwtParser().parseClaimsJws(token).body
         } catch (e: ExpiredJwtException) {
             // Still return claims even if expired for refresh scenarios
             e.claims
@@ -283,52 +286,7 @@ class JwtService {
     
     private fun getSigningKey(): Key {
         val keyBytes = secret.toByteArray()
-        return if (keyBytes.size >= 64) { // 512 bits
-            SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.jcaName)
-        } else {
-            // For shorter secrets, use HMAC-SHA with proper key derivation
-            Keys.hmacShaKeyFor(keyBytes)
-        }
+        return Keys.hmacShaKeyFor(keyBytes)
     }
 }
 
-/**
- * Custom UserDetails implementation for JWT claims
- */
-import com.learning.security.model.User
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.userdetails.UserDetails
-
-class CustomUserDetails(
-    private val user: User
-) : UserDetails {
-    
-    override fun getAuthorities(): Collection<GrantedAuthority> {
-        return user.getAuthorities()
-    }
-    
-    override fun getPassword(): String = user.password
-    
-    override fun getUsername(): String = user.username
-    
-    override fun isAccountNonExpired(): Boolean = user.isAccountNonExpired()
-    
-    override fun isAccountNonLocked(): Boolean = user.isAccountNonLocked()
-    
-    override fun isCredentialsNonExpired(): Boolean = user.isCredentialsNonExpired()
-    
-    override fun isEnabled(): Boolean = user.isEnabled()
-    
-    // Additional methods for JWT claims
-    fun getId(): Long? = user.id
-    
-    fun getEmail(): String = user.email
-    
-    fun getUser(): User = user
-    
-    fun getFullName(): String = user.getFullName()
-    
-    fun hasRole(roleName: String): Boolean = user.hasRole(roleName)
-    
-    fun hasAnyRole(vararg roleNames: String): Boolean = user.hasAnyRole(*roleNames)
-}

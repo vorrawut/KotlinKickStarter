@@ -55,7 +55,7 @@ KotlinKickStarter/
 
 | Lesson | Topic | What You'll Build | Duration |
 |--------|-------|-------------------|----------|
-| **12** | [Authentication & JWT Security](class/modules/lesson_12/) | Secure authentication flow | 30 min |
+| **12** | [Authentication & JWT Security](class/modules/lesson_12/) ✅ | Secure authentication flow | 30 min |
 | **13** | [Caching with Redis](class/modules/lesson_13/) | Performance optimization | 25 min |
 | **14** | [Scheduled Tasks & Async](class/modules/lesson_14/) | Background job processing | 25 min |
 | **15** | [File Handling & Uploads](class/modules/lesson_15/) | File upload/download system | 30 min |

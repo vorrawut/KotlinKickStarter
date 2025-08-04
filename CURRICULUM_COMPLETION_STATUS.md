@@ -20,6 +20,7 @@
 - ✅ **Lesson 9**: CRUD Operations & Transactions *(Advanced data management with comprehensive transaction patterns)*
 - ✅ **Lesson 10**: Pagination & Filtering *(Advanced query patterns with Specification API and full-text search)*
 - ✅ **Lesson 11**: Testing Fundamentals *(Comprehensive testing strategies with JUnit 5, @DataJpaTest, unit and integration tests)*
+- ✅ **Lesson 12**: Authentication & JWT Security *(Enterprise-grade JWT authentication, Spring Security, role-based access control)*
 
 ### **COMPREHENSIVE CONCEPTS CREATED** (Lessons 8-20)
 - 📚 **Lesson 8**: Persistence with Spring Data JPA

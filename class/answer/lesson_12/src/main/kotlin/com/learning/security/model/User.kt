@@ -110,7 +110,6 @@ data class User(
     fun isAccountNonExpired(): Boolean = isActive
     fun isAccountNonLocked(): Boolean = !isLocked
     fun isCredentialsNonExpired(): Boolean = !isCredentialsExpired
-    fun isEnabled(): Boolean = isEnabled
     
     // Business logic methods
     fun getFullName(): String = "$firstName $lastName"

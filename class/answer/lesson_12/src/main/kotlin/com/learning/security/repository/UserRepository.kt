@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Repository
@@ -190,4 +191,32 @@ interface UserRepository : JpaRepository<User, Long> {
         ORDER BY u.createdAt DESC
     """)
     fun findAllActiveUsersWithRoles(): List<User>
+    
+    // Additional methods for pagination support
+    @Query("""
+        SELECT u FROM User u 
+        WHERE u.isActive = true
+        AND (LOWER(u.username) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+        OR LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+        OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+        OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+        ORDER BY u.createdAt DESC
+    """)
+    fun searchActiveUsers(@Param("searchTerm") searchTerm: String, pageable: Pageable): Page<User>
+    
+    @Query("""
+        SELECT u FROM User u 
+        WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+        OR LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+        OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+        OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+        ORDER BY u.createdAt DESC
+    """)
+    fun searchUsers(@Param("searchTerm") searchTerm: String, pageable: Pageable): Page<User>
+    
+    @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt BETWEEN :start AND :end")
+    fun countUsersCreatedBetween(
+        @Param("start") start: LocalDateTime,
+        @Param("end") end: LocalDateTime
+    ): Long
 }
