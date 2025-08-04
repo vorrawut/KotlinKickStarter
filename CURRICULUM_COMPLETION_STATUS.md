@@ -21,10 +21,16 @@
 - ✅ **Lesson 10**: Pagination & Filtering *(Advanced query patterns with Specification API and full-text search)*
 - ✅ **Lesson 11**: Testing Fundamentals *(Comprehensive testing strategies with JUnit 5, @DataJpaTest, unit and integration tests)*
 - ✅ **Lesson 12**: Authentication & JWT Security *(Enterprise-grade JWT authentication, Spring Security, role-based access control)*
+- ✅ **Lesson 13**: Caching with Redis *(High-performance caching strategies, Redis integration, cache monitoring)*
+- ✅ **Lesson 14**: Scheduled Tasks & Async Processing *(Background job management, async operations, task scheduling)*
+- ✅ **Lesson 15**: File Handling & Uploads *(Secure file management, multiple storage strategies, streaming downloads)*
 
 ### **COMPREHENSIVE CONCEPTS CREATED** (Lessons 8-20)
 - 📚 **Lesson 8**: Persistence with Spring Data JPA
 - 📚 **Lesson 12**: Authentication & JWT Security
+- 📚 **Lesson 13**: Caching with Redis
+- 📚 **Lesson 14**: Scheduled Tasks & Async Processing
+- 📚 **Lesson 15**: File Handling & Uploads
 - 📚 **Lesson 17**: Dockerizing Your Application
 
 ### **STRUCTURED OUTLINES** (All Lessons 1-20)

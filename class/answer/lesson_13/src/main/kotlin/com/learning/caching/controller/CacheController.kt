@@ -85,7 +85,7 @@ class CacheController(
         // TODO: Return all keys and values in specified cache
         // HINT: Use RedisTemplate to scan keys
         return try {
-            val keys = redisTemplate.keys("kickstarter:$cacheName::*") ?: emptySet()
+            val keys = redisTemplate.keys("kickstarter:$cacheName::*")
             val contents = mutableMapOf<String, Any?>()
             
             keys.forEach { key ->
