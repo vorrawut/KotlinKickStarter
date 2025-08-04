@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: caching-workshop
+  
+  datasource:
+    url: jdbc:h2:mem:caching_db
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # TODO: Add Redis configuration
+  # redis:
+  #   host: localhost
+  #   port: 6379
+  #   timeout: 2000ms
+  #   lettuce:
+  #     pool:
+  #       max-active: 20
+  #       max-idle: 10
+  #       min-idle: 1
+  #       max-wait: 2000ms
+  
+  # TODO: Add cache configuration
+  # cache:
+  #   type: redis
+  #   redis:
+  #     time-to-live: 300000  # 5 minutes default
+  #     cache-null-values: false
+  #     key-prefix: "kickstarter:"
+  #     use-key-prefix: true
+
+# TODO: Add custom cache TTL settings
+# cache:
+#   ttl:
+#     user-profiles: 3600000    # 1 hour
+#     blog-posts: 1800000       # 30 minutes
+#     post-search: 600000       # 10 minutes
+#     user-posts: 900000        # 15 minutes
+#     popular-posts: 7200000    # 2 hours
+
+logging:
+  level:
+    com.learning.caching: DEBUG
+    org.springframework.cache: DEBUG
