@@ -24,6 +24,9 @@
 - ✅ **Lesson 13**: Caching with Redis *(High-performance caching strategies, Redis integration, cache monitoring)*
 - ✅ **Lesson 14**: Scheduled Tasks & Async Processing *(Background job management, async operations, task scheduling)*
 - ✅ **Lesson 15**: File Handling & Uploads *(Secure file management, multiple storage strategies, streaming downloads)*
+- ✅ **Lesson 16**: Logging & Observability *(Production monitoring, structured logging, health checks, performance tracking)*
+- ✅ **Lesson 17**: Dockerizing Your Application *(Container optimization, multi-stage builds, development environments, production deployment)*
+- ✅ **Lesson 18**: CI/CD Pipeline Setup *(GitHub Actions automation, testing pipelines, deployment strategies, monitoring integration)*
 
 ### **COMPREHENSIVE CONCEPTS CREATED** (Lessons 8-20)
 - 📚 **Lesson 8**: Persistence with Spring Data JPA
@@ -31,7 +34,9 @@
 - 📚 **Lesson 13**: Caching with Redis
 - 📚 **Lesson 14**: Scheduled Tasks & Async Processing
 - 📚 **Lesson 15**: File Handling & Uploads
+- 📚 **Lesson 16**: Logging & Observability
 - 📚 **Lesson 17**: Dockerizing Your Application
+- 📚 **Lesson 18**: CI/CD Pipeline Setup
 
 ### **STRUCTURED OUTLINES** (All Lessons 1-20)
 - 📋 Complete curriculum progression mapping
